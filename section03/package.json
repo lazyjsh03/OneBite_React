@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/lazyjsh03/OneBite_React/issues"
   },
-  "homepage": "https://github.com/lazyjsh03/OneBite_React#readme"
+  "homepage": "https://github.com/lazyjsh03/OneBite_React#readme",
+  "type": "module",
+  "dependencies": {
+    "randomcolor": "^0.6.2"
+  }
 }
