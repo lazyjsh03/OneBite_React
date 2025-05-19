@@ -1,27 +1,21 @@
 import "./App.css";
-import Header from "./components/Header";
-import Main from "./components/Main";
-import Footer from "./components/Footer";
-import Button from "./components/Button";
+import Bulb from "./components/Bulb";
+import Counter from "./components/Counter";
+
+// 리렌더링
+// 1. state 값이 변경되었을 때
+// 2. props의 값이 변경되었을 때
+// 3. 부모 컴포넌트가 리렌더링 되었을 때때
 
 function App() {
   // App component -> root component
 
-  const buttonProps = {
-    text: "메일",
-    color: "red",
-    a: 1,
-    b: 2,
-    c: 3,
-  };
-
   return (
     <>
-      <Button text={"메일"} color={"red"} {...buttonProps} />
-      <Button text={"카페"} />
-      <Button text={"블로그"}>
-        <Header />
-      </Button>
+      <div>
+        <Bulb />
+        <Counter />
+      </div>
     </>
   );
 }
