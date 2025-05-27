@@ -1,61 +1,106 @@
 import "./App.css";
-import { Route, Routes, Link, useNavigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import { useReducer, useRef, useContext, createContext } from "react";
+// pages
 import Home from "./pages/Home";
 import New from "./pages/New";
 import Diary from "./pages/Diary";
+import Edit from "./pages/Edit";
 import NotFound from "./pages/NotFound";
+// components
 import Button from "./components/Button";
 import Header from "./components/Header";
 
-import { getEmotionImage } from "./util/get-emotion-image";
+const mockData = [
+  {
+    id: 1,
+    createdDate: new Date("2025-05-27").getTime(),
+    emotionId: 1,
+    content: "1st diary",
+  },
+  {
+    id: 2,
+    createdDate: new Date("2025-05-26").getTime(),
+    emotionId: 2,
+    content: "2nd diary",
+  },
+  {
+    id: 3,
+    createdDate: new Date("2025-04-01").getTime(),
+    emotionId: 3,
+    content: "3rd diary",
+  },
+];
 
-// 1. "/": Home page
-// 2. "/new": Create new diary
-// 3. "/diary": View diary information
+function reducer(state, action) {
+  switch (action.type) {
+    case "CREATE":
+      return [...state, action.data];
+    case "UPDATE":
+      return state.map((item) =>
+        String(item.id) === String(action.data.id) ? action.data : item
+      );
+    case "DELETE":
+      return state.filter((item) => String(item.id) !== String(action.id));
+    default:
+      return state;
+  }
+}
+
+export const DiaryStateContext = createContext();
+export const DiaryDispatchContext = createContext();
+
 function App() {
-  const nav = useNavigate();
+  const [data, dispatch] = useReducer(reducer, mockData);
+  const idRef = useRef(3);
 
-  const onClickButton = () => {
-    nav("/new");
+  // create new diary
+  const onCreate = (createdDate, emotionId, content) => {
+    dispatch({
+      type: "CREATE",
+      data: {
+        id: idRef.current++,
+        createdDate,
+        emotionId,
+        content,
+      },
+    });
   };
-  // Routes 컴포넌트 안에는 <Route> 컴포넌트만 들어가야 합니다.
+
+  // edit diary
+  const onUpdate = (id, createdDate, emotionId, content) => {
+    dispatch({
+      type: "UPDATE",
+      data: {
+        id,
+        createdDate,
+        emotionId,
+        content,
+      },
+    });
+  };
+
+  // delete diary
+  const onDelete = (id) => {
+    dispatch({
+      type: "DELETE",
+      id: id,
+    });
+  };
+
   return (
     <>
-      <Header
-        title={"Header"}
-        leftChild={<Button text={"left"} />}
-        rightChild={<Button text={"right"} />}
-      />
-
-      <Button
-        text={"123"}
-        onClick={() => {
-          console.log("button clicked");
-        }}
-      />
-
-      <Button
-        text={"123"}
-        type={"POSITIVE"}
-        onClick={() => {
-          console.log("button clicked");
-        }}
-      />
-
-      <Button
-        text={"123"}
-        type={"NEGATIVE"}
-        onClick={() => {
-          console.log("button clicked");
-        }}
-      />
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/new" element={<New />} />
-        <Route path="/diary/:id" element={<Diary />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <DiaryStateContext.Provider value={data}>
+        <DiaryDispatchContext.Provider value={{ onCreate, onUpdate, onDelete }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/new" element={<New />} />
+            <Route path="/diary/:id" element={<Diary />} />
+            <Route path="/edit/:id" element={<Edit />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </DiaryDispatchContext.Provider>
+      </DiaryStateContext.Provider>
     </>
   );
 }
