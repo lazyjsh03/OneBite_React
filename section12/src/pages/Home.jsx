@@ -47,7 +47,11 @@ const Home = () => {
   return (
     <div>
       <Header
-        title={`${pivotDate.getFullYear()}-${pivotDate.getMonth() + 1}`}
+        title={`${pivotDate.getFullYear()}-${
+          pivotDate.getMonth() + 1 < 10
+            ? `0${pivotDate.getMonth() + 1}`
+            : pivotDate.getMonth() + 1
+        }`}
         leftChild={<Button text={"<"} onClick={onDecreaseMonth} />}
         rightChild={<Button text={">"} onClick={onIncreaseMonth} />}
       />
