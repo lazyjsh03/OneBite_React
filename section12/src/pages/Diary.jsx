@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { getStringedDate } from "../util/get-stringed-date";
 import useDiary from "../hooks/useDiary";
+import usePageTitle from "../hooks/usePageTitle";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import Viewer from "../components/Viewer";
@@ -8,6 +9,7 @@ import Viewer from "../components/Viewer";
 const Diary = () => {
   const params = useParams();
   const nav = useNavigate();
+  usePageTitle(`num.${params.id} Diary`);
 
   const curDiaryItem = useDiary(params.id);
   if (!curDiaryItem) {

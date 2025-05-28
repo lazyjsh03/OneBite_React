@@ -4,6 +4,7 @@ import { DiaryStateContext } from "../App";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import DiaryList from "../components/DiaryList";
+import usePageTitle from "../hooks/usePageTitle";
 
 const getMonthlyData = (pivotDate, data) => {
   // 컴포넌트 내에 선언해도 됨
@@ -35,6 +36,8 @@ const Home = () => {
   const [pivotDate, setPivotDate] = useState(new Date());
 
   const monthlyData = getMonthlyData(pivotDate, data);
+
+  usePageTitle("Emotion Diary");
 
   const onIncreaseMonth = () => {
     setPivotDate(new Date(pivotDate.getFullYear(), pivotDate.getMonth() + 1));

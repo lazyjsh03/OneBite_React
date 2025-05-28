@@ -1,6 +1,13 @@
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
-import { useReducer, useRef, useContext, createContext } from "react";
+import {
+  useReducer,
+  useRef,
+  useContext,
+  createContext,
+  useEffect,
+  useState,
+} from "react";
 // pages
 import Home from "./pages/Home";
 import New from "./pages/New";
@@ -11,48 +18,70 @@ import NotFound from "./pages/NotFound";
 import Button from "./components/Button";
 import Header from "./components/Header";
 
-const mockData = [
-  {
-    id: 1,
-    createdDate: new Date("2025-05-27").getTime(),
-    emotionId: 1,
-    content: "1st diary",
-  },
-  {
-    id: 2,
-    createdDate: new Date("2025-05-26").getTime(),
-    emotionId: 2,
-    content: "2nd diary",
-  },
-  {
-    id: 3,
-    createdDate: new Date("2025-04-01").getTime(),
-    emotionId: 3,
-    content: "3rd diary",
-  },
-];
-
 function reducer(state, action) {
+  let nextState;
+
   switch (action.type) {
-    case "CREATE":
-      return [...state, action.data];
-    case "UPDATE":
-      return state.map((item) =>
+    case "INIT":
+      return action.data;
+    case "CREATE": {
+      nextState = [...state, action.data];
+      break;
+    }
+    case "UPDATE": {
+      nextState = state.map((item) =>
         String(item.id) === String(action.data.id) ? action.data : item
       );
-    case "DELETE":
-      return state.filter((item) => String(item.id) !== String(action.id));
+      break;
+    }
+    case "DELETE": {
+      nextState = state.filter((item) => String(item.id) !== String(action.id));
+      break;
+    }
     default:
       return state;
   }
+
+  localStorage.setItem("diary", JSON.stringify(nextState));
+  return nextState;
 }
 
 export const DiaryStateContext = createContext();
 export const DiaryDispatchContext = createContext();
 
 function App() {
-  const [data, dispatch] = useReducer(reducer, mockData);
-  const idRef = useRef(3);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, dispatch] = useReducer(reducer, []);
+  const idRef = useRef(0);
+
+  useEffect(() => {
+    const storedData = localStorage.getItem("diary");
+    if (!storedData) {
+      setIsLoading(false);
+      return;
+    }
+    const parsedData = JSON.parse(storedData);
+    if (!Array.isArray(parsedData)) {
+      setIsLoading(false);
+      return;
+    }
+
+    let maxId = 0;
+    parsedData.forEach((item) => {
+      if (Number(item.id) > maxId) {
+        maxId = Number(item.id);
+      }
+    });
+
+    idRef.current = maxId + 1;
+
+    dispatch({
+      type: "INIT",
+      data: parsedData,
+    });
+
+    setIsLoading(false);
+  }, []);
 
   // create new diary
   const onCreate = (createdDate, emotionId, content) => {
@@ -87,6 +116,10 @@ function App() {
       id: id,
     });
   };
+
+  if (isLoading) {
+    return <div>loading...</div>;
+  }
 
   return (
     <>
