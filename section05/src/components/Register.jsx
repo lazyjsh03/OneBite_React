@@ -14,7 +14,7 @@ const Register = () => {
     bio: "",
   });
 
-  const countRef = useRef(0); // useRef = 렌더링에 영향을 끼치지 않는 변수수
+  const countRef = useRef(0); // useRef = 렌더링에 영향을 끼치지 않는 변수
   const inputRef = useRef();
 
   const onChange = (e) => {
