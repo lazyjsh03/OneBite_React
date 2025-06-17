@@ -17,8 +17,6 @@ import NotFound from "./pages/NotFound";
 // components
 import Button from "./components/Button";
 import Header from "./components/Header";
-// database
-// import pool from "./util/database";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -43,7 +41,7 @@ function reducer(state, action) {
 export const DiaryStateContext = createContext();
 export const DiaryDispatchContext = createContext();
 
-const API_URL = "http://localhost:4000/diaries";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/diaries";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);

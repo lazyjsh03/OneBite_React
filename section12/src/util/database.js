@@ -1,13 +1,15 @@
 import sqlite3 from "sqlite3";
 import path, { resolve } from "path";
 import { fileURLToPath } from "url";
+import process from "process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const sqlite = sqlite3.verbose();
 
-const dbPath = path.resolve(__dirname, "..", "..", "diary.db");
+const dbPath =
+  process.env.DATABASE_PATH || path.resolve(__dirname, "..", "..", "diary.db");
 const db = new sqlite.Database(dbPath, (err) => {
   if (err) {
     console.error(err.message);
