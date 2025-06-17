@@ -1,12 +1,5 @@
 import "./App.css";
-import {
-  useState,
-  useRef,
-  useReducer,
-  useCallback,
-  createContext,
-  useMemo,
-} from "react";
+import { useRef, useReducer, useCallback, createContext, useMemo } from "react";
 
 import Header from "./components/Header";
 import Editor from "./components/Editor";

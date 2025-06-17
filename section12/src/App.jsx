@@ -17,6 +17,8 @@ import NotFound from "./pages/NotFound";
 // components
 import Button from "./components/Button";
 import Header from "./components/Header";
+// database
+// import pool from "./util/database";
 
 function reducer(state, action) {
   let nextState;
