@@ -1,14 +1,18 @@
 import sqlite3 from "sqlite3";
 import path, { resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const sqlite = sqlite3.verbose();
 
-const dbPath = path.resolve(path.dirname, "..", "..", "diary.db");
+const dbPath = path.resolve(__dirname, "..", "..", "diary.db");
 const db = new sqlite.Database(dbPath, (err) => {
   if (err) {
     console.error(err.message);
   }
-  console.log("일기 데이터베이스에 연결됨.");
+  console.log("Connected to the diary database");
 });
 
 // 테이블 초기화
@@ -16,9 +20,9 @@ export const initDb = () => {
   db.run(
     `CREATE TABLE IF NOT EXISTS diary (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      createDate INTEGER,
+      createdDate INTEGER,
       emotionId INTEGER,
-      context TEXT,
+      content TEXT
     )`,
     (err) => {
       if (err) {
@@ -48,12 +52,12 @@ export const createDiary = (createdDate, emotionId, content) => {
     db.run(
       `INSERT INTO diary (createdDate, emotionId, content) VALUES (?, ?, ?)`,
       [createdDate, emotionId, content],
-      (err) => {
+      function (err) {
         if (err) {
           reject(err);
         }
         // 새로 생성된 아이템의 id와 함께 데이터 반환
-        resolve({ id: this.lastId, createdDate, emotionId, content });
+        resolve({ id: this.lastID, createdDate, emotionId, content });
       }
     );
   });
@@ -65,7 +69,7 @@ export const updateDiary = (id, createdDate, emotionId, content) => {
     db.run(
       `UPDATE diary SET createdDate = ?, emotionId = ?, content = ? WHERE id = ?`,
       [createdDate, emotionId, content, id],
-      (err) => {
+      function (err) {
         if (err) {
           reject(err);
         }
@@ -78,7 +82,7 @@ export const updateDiary = (id, createdDate, emotionId, content) => {
 // 일기 삭제
 export const deleteDiary = (id) => {
   return new Promise((resolve, reject) => {
-    db.run(`DELETE FROM diary WHERE id = ?`, id, (err) => {
+    db.run(`DELETE FROM diary WHERE id = ?`, id, function (err) {
       if (err) {
         reject(err);
       }

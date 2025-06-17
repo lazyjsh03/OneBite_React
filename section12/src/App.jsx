@@ -21,35 +21,29 @@ import Header from "./components/Header";
 // import pool from "./util/database";
 
 function reducer(state, action) {
-  let nextState;
-
   switch (action.type) {
     case "INIT":
       return action.data;
     case "CREATE": {
-      nextState = [...state, action.data];
-      break;
+      return [...state, action.data];
     }
     case "UPDATE": {
-      nextState = state.map((item) =>
+      return state.map((item) =>
         String(item.id) === String(action.data.id) ? action.data : item
       );
-      break;
     }
     case "DELETE": {
-      nextState = state.filter((item) => String(item.id) !== String(action.id));
-      break;
+      return state.filter((item) => String(item.id) !== String(action.id));
     }
     default:
       return state;
   }
-
-  localStorage.setItem("diary", JSON.stringify(nextState));
-  return nextState;
 }
 
 export const DiaryStateContext = createContext();
 export const DiaryDispatchContext = createContext();
+
+const API_URL = "http://localhost:4000/diaries";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -57,66 +51,92 @@ function App() {
   const idRef = useRef(0);
 
   useEffect(() => {
-    const storedData = localStorage.getItem("diary");
-    if (!storedData) {
-      setIsLoading(false);
-      return;
-    }
-    const parsedData = JSON.parse(storedData);
-    if (!Array.isArray(parsedData)) {
-      setIsLoading(false);
-      return;
-    }
+    const fetchDiaries = async () => {
+      try {
+        const res = await fetch(API_URL);
+        const rawData = await res.json();
 
-    let maxId = 0;
-    parsedData.forEach((item) => {
-      if (Number(item.id) > maxId) {
-        maxId = Number(item.id);
+        // createdDate 숫자로 변환
+        const parsedData = rawData.map((item) => ({
+          ...item,
+          createdDate: Number(item.createdDate),
+        }));
+
+        if (Array.isArray(parsedData)) {
+          dispatch({
+            type: "INIT",
+            data: parsedData,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fatch Diary: ", error);
+        alert("데이터 불러오기 실패");
+      } finally {
+        setIsLoading(false);
       }
-    });
+    };
 
-    idRef.current = maxId + 1;
-
-    dispatch({
-      type: "INIT",
-      data: parsedData,
-    });
-
-    setIsLoading(false);
+    fetchDiaries();
   }, []);
 
   // create new diary
-  const onCreate = (createdDate, emotionId, content) => {
-    dispatch({
-      type: "CREATE",
-      data: {
-        id: idRef.current++,
-        createdDate,
-        emotionId,
-        content,
-      },
-    });
+  const onCreate = async (createdDate, emotionId, content) => {
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ createdDate, emotionId, content }),
+      });
+      const newData = await res.json();
+      dispatch({
+        type: "CREATE",
+        data: {
+          ...newData,
+          createdDate: Number(newData.createdDate),
+        },
+      });
+    } catch (error) {
+      console.error("Failed to create Diary: ", error);
+      alert("새 일기 생성 실패");
+    }
   };
 
   // edit diary
-  const onUpdate = (id, createdDate, emotionId, content) => {
-    dispatch({
-      type: "UPDATE",
-      data: {
-        id,
-        createdDate,
-        emotionId,
-        content,
-      },
-    });
+  const onUpdate = async (id, createdDate, emotionId, content) => {
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ createdDate, emotionId, content }),
+      });
+      const updatedData = await res.json();
+      dispatch({
+        type: "UPDATE",
+        data: {
+          ...updatedData,
+          createdDate: Number(updatedData.createdDate),
+        },
+      });
+    } catch (error) {
+      console.error("Failed to update Diary: ", error);
+      alert("일기 수정 실패");
+    }
   };
 
   // delete diary
-  const onDelete = (id) => {
-    dispatch({
-      type: "DELETE",
-      id: id,
-    });
+  const onDelete = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+      });
+      dispatch({
+        type: "DELETE",
+        id: id,
+      });
+    } catch (error) {
+      console.error("Failed to delete Diary: ", error);
+      alert("일기 삭제 실패");
+    }
   };
 
   if (isLoading) {
